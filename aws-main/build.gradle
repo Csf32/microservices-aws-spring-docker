@@ -1,0 +1,57 @@
+
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '2.7.13-SNAPSHOT'
+	id 'io.spring.dependency-management' version '1.0.15.RELEASE'
+	id 'com.palantir.docker' version '0.22.1'
+}
+
+group = "your usernameDocker"
+version = "0.0.1-SNAPSHOT"
+sourceCompatibility = "17"
+
+bootJar{
+	baseName = 'aws-spring-image'
+	version = '1.0.0'
+}
+
+task unpack(type: Copy) {
+   dependsOn bootJar
+   from(zipTree(tasks.bootJar.outputs.files.singleFile))
+   into("build/dependency")
+}
+
+docker{
+	name "${project.group}/${bootJar.baseName}"
+	tags "${bootJar.version}"
+   	copySpec.from(tasks.unpack.outputs).into("dependency")
+   	buildArgs(['DEPENDENCY': "dependency"])
+}
+
+java {
+	sourceCompatibility = '17'
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+	maven { url 'https://repo.spring.io/milestone' }
+	maven { url 'https://repo.spring.io/snapshot' }
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	compileOnly 'org.projectlombok:lombok'
+	developmentOnly 'org.springframework.boot:spring-boot-devtools'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
