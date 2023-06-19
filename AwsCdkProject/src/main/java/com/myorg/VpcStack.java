@@ -2,7 +2,6 @@ package com.myorg;
 
 import software.amazon.awscdk.Stack;
 import software.amazon.awscdk.StackProps;
-
 import software.amazon.awscdk.services.ec2.Vpc;
 import software.constructs.Construct;
 
@@ -17,6 +16,7 @@ public class VpcStack extends Stack {
 
       Vpc.Builder.create(this, "Vpc01")
             .maxAzs(3)
+            .natGateways(0)
             .build();
 
     }
